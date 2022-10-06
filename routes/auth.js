@@ -47,14 +47,6 @@ router.post("/register", async (req, res, next) => {
   if (!username || !password || !first_name || !last_name)
     return next(new ExpressError(`All form the to be fill`, 400));
 
-  // let user = new User({
-  //   username,
-  //   password,
-  //   first_name,
-  //   last_name,
-  //   phone,
-  // });
-
   try {
     let user = await User.register({
       username,

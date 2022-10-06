@@ -84,7 +84,22 @@ class User {
   /** All: basic info on all users:
    * [{username, first_name, last_name, phone}, ...] */
 
-  static async all() {}
+  static async all() {
+    try {
+      const results = await db.query(
+        `
+        select username, first_name, last_name, phone, last_login_at, join_at 
+        from users;
+          `
+      );
+      if (!results.rows) {
+        throw new ExpressError(`Not users found in the DataBase`);
+      }
+      return results.rows.map((u) => new User(u));
+    } catch (error) {
+      return error;
+    }
+  }
 
   /** Get: get user by username
    *
@@ -95,7 +110,24 @@ class User {
    *          join_at,
    *          last_login_at } */
 
-  static async get(username) {}
+  static async get(username) {
+    try {
+      const results = await db.query(
+        `
+        select username, first_name, last_name, phone, join_at, last_login_at
+        from users
+        where username = $1;
+          `,
+        [username]
+      );
+      if (!results.rows[0]) {
+        throw new ExpressError(`User not found: ${username}`);
+      }
+      return results.rows.map((u) => new User(u));
+    } catch (error) {
+      return error;
+    }
+  }
 
   /** Return messages from this user.
    *
