@@ -34,16 +34,22 @@ router.post("/register", async (req, res, next) => {
   if (!username || !password || !first_name || !last_name)
     return next(new ExpressError(`All form the to be fill`, 400));
 
-  let user = new User({
-    username,
-    password,
-    first_name,
-    last_name,
-    phone,
-  });
+  // let user = new User({
+  //   username,
+  //   password,
+  //   first_name,
+  //   last_name,
+  //   phone,
+  // });
 
   try {
-    user = await user.register();
+    let user = await User.register(
+      username,
+      password,
+      first_name,
+      last_name,
+      phone
+    );
     if (user.code === "23505")
       return next(
         new ExpressError(`Username is already taken, Please pick another!`, 400)
@@ -59,8 +65,9 @@ router.post("/login", async (req, res, next) => {
   if (!username || !password)
     return next(new ExpressError(`Username and password require`, 400));
 
-  let user = new User({ username, password });
-  token = await user.authenticate();
+  // let user = new User({ username, password });
+  // token = await user.authenticate();
+  let token = await User.authenticate(username, password);
   return res.json({ token });
 });
 

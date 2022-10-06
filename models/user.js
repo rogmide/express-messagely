@@ -21,16 +21,16 @@ class User {
    *    {username, password, first_name, last_name, phone}
    */
 
-  async register() {
+  static async register(username, password, first_name, last_name, phone) {
     try {
-      const hashpwd = await bcrypt.hash(this.password, BCRYPT_WORK_FACTOR);
+      const hashpwd = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
       const results = await db.query(
         `
         insert into users (username, password, first_name, last_name, phone, join_at, last_login_at)
         values ($1, $2, $3, $4, $5, current_timestamp, current_timestamp)
         returning username, password
         `,
-        [this.username, hashpwd, this.first_name, this.last_name, this.phone]
+        [username, hashpwd, first_name, last_name, phone]
       );
 
       return results.rows[0];
@@ -41,7 +41,7 @@ class User {
 
   /** Authenticate: is this username/password valid? Returns boolean. */
 
-  async authenticate() {
+  static async authenticate(username, password) {
     try {
       const results = await db.query(
         `
@@ -49,13 +49,13 @@ class User {
       from users
       where username = $1
       `,
-        [this.username]
+        [username]
       );
 
       const user = results.rows[0];
       if (user) {
-        let username = this.username;
-        if (await bcrypt.compare(this.password, user.password)) {
+        // let username = this.username;
+        if (await bcrypt.compare(password, user.password)) {
           const token = jwt.sign({ username }, SECRET_KEY);
           return token;
         }
