@@ -42,7 +42,13 @@ app.use(function (err, req, res, next) {
 
   return res.json({
     error: err,
-    message: err.message,
+    // message: err.message,
+    get message() {
+      return this._message;
+    },
+    set message(value) {
+      this._message = value;
+    },
   });
 });
 

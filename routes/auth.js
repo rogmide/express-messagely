@@ -17,8 +17,9 @@ const db = require("../db");
 const ExpressError = require("../expressError");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { BCRYPT_WORK_FACTOR, SECRET_KEY } = require("../config");
 const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
+const User = require("../models/user");
+const { SECRET_KEY } = require("../config");
 
 router.get("/", async (req, res, next) => {
   try {
@@ -28,5 +29,39 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+router.post("/register", async (req, res, next) => {
+  const { username, password, first_name, last_name, phone } = req.body;
+  if (!username || !password || !first_name || !last_name)
+    return next(new ExpressError(`All form the to be fill`, 400));
+
+  let user = new User({
+    username,
+    password,
+    first_name,
+    last_name,
+    phone,
+  });
+
+  try {
+    user = await user.register();
+    if (user.code === "23505")
+      return next(
+        new ExpressError(`Username is already taken, Please pick another!`, 400)
+      );
+    return res.json({ user });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.post("/login", async (req, res, next) => {
+  const { username, password } = req.body;
+  if (!username || !password)
+    return next(new ExpressError(`Username and password require`, 400));
+
+  let user = new User({ username, password });
+  token = await user.authenticate();
+  return res.json({ token });
+});
 
 module.exports = router;
