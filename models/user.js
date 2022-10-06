@@ -21,7 +21,7 @@ class User {
    *    {username, password, first_name, last_name, phone}
    */
 
-  static async register(username, password, first_name, last_name, phone) {
+  static async register({ username, password, first_name, last_name, phone }) {
     try {
       const hashpwd = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
       const results = await db.query(
@@ -54,14 +54,8 @@ class User {
 
       const user = results.rows[0];
       if (user) {
-        // let username = this.username;
-        if (await bcrypt.compare(password, user.password)) {
-          const token = jwt.sign({ username }, SECRET_KEY);
-          return token;
-        }
+        return await bcrypt.compare(password, user.password);
       }
-
-      throw new ExpressError(`Invalid username/password!`, 400);
     } catch (error) {
       return error;
     }
@@ -69,7 +63,23 @@ class User {
 
   /** Update last_login_at for user */
 
-  static async updateLoginTimestamp(username) {}
+  static async updateLoginTimestamp(username) {
+    try {
+      const results = await db.query(
+        `
+        update users 
+        set last_login_at = current_timestamp 
+        where username = $1
+        `,
+        [username]
+      );
+      if (results.rows[0] === null) {
+        throw new ExpressError(`User not found: ${username}`);
+      }
+    } catch (error) {
+      return error;
+    }
+  }
 
   /** All: basic info on all users:
    * [{username, first_name, last_name, phone}, ...] */
