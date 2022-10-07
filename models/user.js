@@ -123,7 +123,7 @@ class User {
       if (!results.rows[0]) {
         throw new ExpressError(`User not found: ${username}`);
       }
-      return results.rows.map((u) => new User(u));
+      return results.rows[0];
     } catch (error) {
       return error;
     }
@@ -137,7 +137,49 @@ class User {
    *   {username, first_name, last_name, phone}
    */
 
-  static async messagesFrom(username) {}
+  static async messagesFrom(username) {
+    try {
+      const results = await db.query(
+        `
+        select m.id, m.body, m.sent_at, m.read_at, m.to_username, u.first_name, u.last_name, u.phone 
+        from messages as m
+        join users as u 
+        on m.to_username = u.username
+        where m.from_username = $1;
+          `,
+        [username]
+      );
+      if (!results.rows[0]) {
+        throw new ExpressError(`User not found: ${username}`);
+      }
+
+      // id: expect.any(Number),
+      // body: "u1-to-u2",
+      // sent_at: expect.any(Date),
+      // read_at: null,
+      // to_user: {
+      //   username: "test2",
+      //   first_name: "Test2",
+      //   last_name: "Testy2",
+      //   phone: "+14155552222",
+      // }
+
+      return results.rows.map((m) => ({
+        id: m.id,
+        body: m.body,
+        sent_at: m.sent_at,
+        read_at: m.read_at,
+        to_user: {
+          username: m.to_username,
+          first_name: m.first_name,
+          last_name: m.last_name,
+          phone: m.phone,
+        },
+      }));
+    } catch (error) {
+      return error;
+    }
+  }
 
   /** Return messages to this user.
    *
@@ -147,7 +189,38 @@ class User {
    *   {username, first_name, last_name, phone}
    */
 
-  static async messagesTo(username) {}
+  static async messagesTo(username) {
+    try {
+      const results = await db.query(
+        `
+        select m.id, m.body, m.sent_at, m.read_at, m.from_username, u.first_name, u.last_name, u.phone 
+        from messages as m
+        join users as u 
+        on m.from_username = u.username
+        where m.to_username = $1
+          `,
+        [username]
+      );
+      if (!results.rows[0]) {
+        throw new ExpressError(`User not found: ${username}`);
+      }
+
+      return results.rows.map((m) => ({
+        id: m.id,
+        body: m.body,
+        sent_at: m.sent_at,
+        read_at: m.read_at,
+        from_user: {
+          username: m.from_username,
+          first_name: m.first_name,
+          last_name: m.last_name,
+          phone: m.phone,
+        },
+      }));
+    } catch (error) {
+      return error;
+    }
+  }
 }
 
 module.exports = User;

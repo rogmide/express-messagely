@@ -59,8 +59,10 @@ router.post("/register", async (req, res, next) => {
       return next(
         new ExpressError(`Username is already taken, Please pick another!`, 400)
       );
+    let token = jwt.sign({ username }, SECRET_KEY);
+
     await User.updateLoginTimestamp(username);
-    return res.json(user);
+    return res.json({ token });
   } catch (err) {
     return next(err);
   }

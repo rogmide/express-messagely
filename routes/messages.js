@@ -11,13 +11,6 @@
  *
  **/
 
-/** POST / - post message.
- *
- * {to_username, body} =>
- *   {message: {id, from_username, to_username, body, sent_at}}
- *
- **/
-
 /** POST/:id/read - mark message as read:
  *
  *  => {message: {id, read_at}}
@@ -55,8 +48,6 @@ router.post("/", async (req, res, next) => {
   try {
     let from_username = req.user.username;
     const { to_username, body } = req.body;
-    console.log(to_username, body);
-    console.log(from_username);
     let msg = await Message.create({ from_username, to_username, body });
     return res.json(msg);
   } catch (error) {
