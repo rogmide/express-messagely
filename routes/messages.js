@@ -18,7 +18,7 @@ router.get("/", async (req, res, next) => {
  *
  **/
 
-router.post("/", async (req, res, next) => {
+router.post("/", ensureLoggedIn, async (req, res, next) => {
   try {
     let from_username = req.user.username;
     const { to_username, body } = req.body;
@@ -42,7 +42,7 @@ router.post("/", async (req, res, next) => {
  *
  **/
 
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", ensureLoggedIn, async (req, res, next) => {
   try {
     let msg = await Message.get(req.params.id);
     return res.json(msg);
@@ -59,7 +59,7 @@ router.get("/:id", async (req, res, next) => {
  *
  **/
 
-router.post("/:id/read", async (req, res, next) => {
+router.post("/:id/read", ensureLoggedIn, async (req, res, next) => {
   try {
     let msg = await Message.markRead(req.params.id);
     return res.json(msg);

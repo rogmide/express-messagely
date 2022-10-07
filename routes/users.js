@@ -10,7 +10,7 @@ const User = require("../models/user");
  *
  **/
 
-router.get("/", async (req, res, next) => {
+router.get("/", ensureLoggedIn, async (req, res, next) => {
   try {
     let users = await User.all();
     res.send(users);
@@ -25,7 +25,7 @@ router.get("/", async (req, res, next) => {
  *
  **/
 
-router.get("/:username", async (req, res, next) => {
+router.get("/:username", ensureLoggedIn, async (req, res, next) => {
   try {
     let user = await User.get(req.params.username);
     res.send(user);
@@ -44,7 +44,7 @@ router.get("/:username", async (req, res, next) => {
  *
  **/
 
-router.get("/:username/to", async (req, res, next) => {
+router.get("/:username/to", ensureLoggedIn, async (req, res, next) => {
   try {
     let msgs = await User.messagesTo(req.params.username);
     res.send(msgs);
@@ -63,7 +63,7 @@ router.get("/:username/to", async (req, res, next) => {
  *
  **/
 
-router.get("/:username/from", async (req, res, next) => {
+router.get("/:username/from", ensureLoggedIn, async (req, res, next) => {
   try {
     let msgs = await User.messagesFrom(req.params.username);
     res.send(msgs);
