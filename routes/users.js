@@ -1,22 +1,5 @@
-
-
-/** GET /:username/from - get messages from user
- *
- * => {messages: [{id,
- *                 body,
- *                 sent_at,
- *                 read_at,
- *                 to_user: {username, first_name, last_name, phone}}, ...]}
- *
- **/
-
 const express = require("express");
 const router = express.Router();
-const db = require("../db");
-const ExpressError = require("../expressError");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { BCRYPT_WORK_FACTOR, SECRET_KEY } = require("../config");
 const { ensureLoggedIn, ensureAdmin } = require("../middleware/auth");
 const { route } = require("./auth");
 const User = require("../models/user");
@@ -60,5 +43,33 @@ router.get("/:username", async (req, res, next) => {
  *                 from_user: {username, first_name, last_name, phone}}, ...]}
  *
  **/
+
+router.get("/:username/to", async (req, res, next) => {
+  try {
+    let msgs = await User.messagesTo(req.params.username);
+    res.send(msgs);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/** GET /:username/from - get messages from user
+ *
+ * => {messages: [{id,
+ *                 body,
+ *                 sent_at,
+ *                 read_at,
+ *                 to_user: {username, first_name, last_name, phone}}, ...]}
+ *
+ **/
+
+router.get("/:username/from", async (req, res, next) => {
+  try {
+    let msgs = await User.messagesFrom(req.params.username);
+    res.send(msgs);
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;
